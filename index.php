@@ -17,12 +17,16 @@ and open the template in the editor.
         $level = 10;
         echo 'Hi, my name is ' . $name . ', and I am a level ' . $level . ' ' . $what;
         
-        // From PHP Expressions
+        // From PHP Expressions and PHP Selection
         $hoursworked = 10;
         $rate = 12;
-        $total = $hoursworked * $rate;
+        if ($hoursworked > 40) {
+            $total = $hoursworked * $rate * 1.5;
+        } else {
+            $total = $hoursworked * $rate;
+        }
         echo '<br />';
-        echo 'You owe me $' . $total;
+        echo ($total > 0) ? 'You owe me $' . $total : "You're welcome.";
         ?>
     </body>
 </html>
