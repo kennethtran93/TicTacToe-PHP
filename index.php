@@ -18,7 +18,7 @@ and open the template in the editor.
         echo 'Hi, my name is ' . $name . ', and I am a level ' . $level . ' ' . $what;
         
         // From PHP Expressions and PHP Selection
-        $hoursworked = 10;
+        $hoursworked = $_GET['hours'];
         $rate = 12;
         if ($hoursworked > 40) {
             $total = $hoursworked * $rate * 1.5;
