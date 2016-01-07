@@ -16,6 +16,13 @@ and open the template in the editor.
         $what = 'geek';
         $level = 10;
         echo 'Hi, my name is ' . $name . ', and I am a level ' . $level . ' ' . $what;
+        
+        // From PHP Expressions
+        $hoursworked = 10;
+        $rate = 12;
+        $total = $hoursworked * $rate;
+        echo '<br />';
+        echo 'You owe me $' . $total;
         ?>
     </body>
 </html>
