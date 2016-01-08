@@ -79,7 +79,7 @@ function winner($token, $position, $DEBUG) {
             }
             if (!$won) {
                 if ($DEBUG) {
-                    echo 'Skipped checking the rest of this row (row ' . ($row + 1) . ').<br />';
+                    echo '<i>Skipped checking the rest of this row (row ' . ($row + 1) . ').</i><br />';
                 }
                 break;
             }
@@ -106,7 +106,7 @@ function winner($token, $position, $DEBUG) {
 
                 if (!$won) {
                     if ($DEBUG) {
-                        echo 'Skipped checking the rest of this column (column ' . ($col + 1) . ').<br />';
+                        echo '<i>Skipped checking the rest of this column (column ' . ($col + 1) . ').</i><br />';
                     }
                     break;
                 }
