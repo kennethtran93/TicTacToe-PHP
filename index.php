@@ -37,7 +37,7 @@ and open the template in the editor.
                     echo '<strong>O (Ken\'s AI) is the winner of this game.  YOU FAIL!</strong><br />';
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '">Click here to start a new game!</a>';
                 } else if (stristr($position, '-') === FALSE) {
-                    echo 'This game is TIED as there are no more moves left.<br />';
+                    echo '<strong>This game is TIED as there are no more moves left.</strong><br />';
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '">Click here to start a new game!</a>';
                 } else {
                     echo 'No winner yet.  <strong>It\'s your turn now.</strong><br />';
