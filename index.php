@@ -31,10 +31,10 @@ and open the template in the editor.
                     echo 'ERROR DETECTED - There are too many Os on the game board.  Since I\'m not programmed to cheat, you must have done something to the game board.<br />';
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '">Click here to start a new game!</a>';
                 } else if ($game->winner('x')) {
-                    echo '<strong>X (YOU) is the winner in this game.  Congratulations.</strong><br />';
+                    echo '<strong>X (YOU) is the winner of this game.  Congratulations.</strong><br />';
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '">Click here to start a new game!</a>';
                 } else if ($game->winner('o')) {
-                    echo '<strong>O (Ken\'s AI) is the winner in this game.  YOU FAIL!</strong><br />';
+                    echo '<strong>O (Ken\'s AI) is the winner of this game.  YOU FAIL!</strong><br />';
                     echo '<a href="' . $_SERVER['PHP_SELF'] . '">Click here to start a new game!</a>';
                 } else if (stristr($position, '-') === FALSE) {
                     echo 'This game is TIED as there are no more moves left.<br />';
