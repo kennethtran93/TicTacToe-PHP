@@ -12,23 +12,21 @@ and open the template in the editor.
     <body>
         <?php
         // put your code here
+        $DEBUG = false;
         if (isset($_GET['board'])) {
             // board variable found
             $position = $_GET['board'];
             if (strlen($position) == 9) {
                 // Perfect variable response.  Continuing...
                 $squares = str_split($position);
-                echo '<font face="courier" size="5">';
-                for ($x = 0; $x < 9; $x++) {
-                    echo $squares[$x];
-                    if (($x + 1) % 3 == 0) {
-                        echo '<br />';
-                    }
+                // Debug - Display Draft Game Grid
+                if ($DEBUG) {
+                    displayGrid();
                 }
-                echo '</font>';
-                if (winner('x', $squares)) {
+
+                if (winner('x', $squares, $DEBUG)) {
                     echo '<strong>X is the winner in this game.</strong>';
-                } else if (winner('o', $squares)) {
+                } else if (winner('o', $squares, $DEBUG)) {
                     echo '<strong>O is the winner in this game.</strong>';
                 } else {
                     echo '<strong>No winner yet.</strong>';
@@ -52,20 +50,37 @@ and open the template in the editor.
 
 <?php
 
-function winner($token, $position) {
+function displayGrid() {
+    echo '<font face="courier" size="5">';
+    for ($x = 0; $x < 9; $x++) {
+        echo $squares[$x];
+        if (($x + 1) % 3 == 0) {
+            echo '<br />';
+        }
+    }
+    echo '</font>';
+}
+
+function winner($token, $position, $DEBUG) {
     $won = false;
     // Horizontal checking
     for ($row = 0; $row < 3; $row++) {
         $won = true;
         for ($col = 0; $col < 3; $col++) {
-            echo 'checking row cell: ' . $row . ',' . $col;
-            echo '  position: ' . (3 * $row + $col);
+            if ($DEBUG) {
+                echo 'checking row cell: ' . $row . ',' . $col;
+                echo '  position: ' . (3 * $row + $col);
+            }
             if ($position[3 * $row + $col] != $token) {
                 $won = false;  // note the negative test
             }
-            echo '  result: ' . $won . '<br />';
+            if ($DEBUG) {
+                echo '  result: ' . $won . '<br />';
+            }
             if (!$won) {
-                echo 'Skipped checking the rest of this row (row ' . ($row + 1) . ').<br />';
+                if ($DEBUG) {
+                    echo 'Skipped checking the rest of this row (row ' . ($row + 1) . ').<br />';
+                }
                 break;
             }
         }
@@ -78,15 +93,21 @@ function winner($token, $position) {
         for ($col = 0; $col < 3; $col++) {
             $won = true;
             for ($row = 0; $row < 3; $row++) {
-                echo 'checking column cell: ' . $row . ',' . $col;
-                echo '  position: ' . (3 * $row + $col);
+                if ($DEBUG) {
+                    echo 'checking column cell: ' . $row . ',' . $col;
+                    echo '  position: ' . (3 * $row + $col);
+                }
                 if ($position[3 * $row + $col] != $token) {
                     $won = false;  // note the negative test
                 }
-                echo '  result: ' . $won . '<br />';
-                if (!$won) {
-                    echo 'Skipped checking the rest of this column (column ' . ($col + 1) . ').<br />';
+                if ($DEBUG) {
+                    echo '  result: ' . $won . '<br />';
+                }
 
+                if (!$won) {
+                    if ($DEBUG) {
+                        echo 'Skipped checking the rest of this column (column ' . ($col + 1) . ').<br />';
+                    }
                     break;
                 }
             }
@@ -97,7 +118,9 @@ function winner($token, $position) {
     }
     if (!$won) {
         // Diagonal Checking
-        echo 'checking diagonals...<br />';
+        if ($DEBUG) {
+            echo 'checking diagonals...<br />';
+        }
         if (($position[0] == $token) &&
                 ($position[4] == $token) &&
                 ($position[8] == $token)) {
