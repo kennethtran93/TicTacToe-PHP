@@ -13,6 +13,10 @@ and open the template in the editor.
         <?php
         // put your code here
         $DEBUG = false;
+        if (isset($_GET['debug'])) {
+            // Debug variable declared
+            $DEBUG = true;
+        }
         if (isset($_GET['board'])) {
             // board variable found
             $position = $_GET['board'];
