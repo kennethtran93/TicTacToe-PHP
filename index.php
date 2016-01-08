@@ -25,7 +25,14 @@ and open the template in the editor.
                 $squares = str_split($position);
                 // Debug - Display Draft Game Grid
                 if ($DEBUG) {
-                    displayGrid();
+                    echo '<font face="courier" size="5">';
+                    for ($x = 0; $x < 9; $x++) {
+                        echo $squares[$x];
+                        if (($x + 1) % 3 == 0) {
+                            echo '<br />';
+                        }
+                    }
+                    echo '</font>';
                 }
 
                 if (winner('x', $squares, $DEBUG)) {
@@ -53,17 +60,6 @@ and open the template in the editor.
 </html>
 
 <?php
-
-function displayGrid() {
-    echo '<font face="courier" size="5">';
-    for ($x = 0; $x < 9; $x++) {
-        echo $squares[$x];
-        if (($x + 1) % 3 == 0) {
-            echo '<br />';
-        }
-    }
-    echo '</font>';
-}
 
 function winner($token, $position, $DEBUG) {
     $won = false;
