@@ -7,7 +7,7 @@ and open the template in the editor.
 <html>
     <head>
         <meta charset="UTF-8">
-        <title></title>
+        <title>Ken's Tic Tac Toe</title>
     </head>
     <body>
         <?php
@@ -18,18 +18,26 @@ and open the template in the editor.
             if (strlen($position) == 9) {
                 // Perfect variable response.  Continuing...
                 $squares = str_split($position);
+                echo '<font face="courier" size="5">';
+                for ($x = 0; $x < 9; $x++) {
+                    echo $squares[$x];
+                    if (($x + 1) % 3 == 0) {
+                        echo '<br />';
+                    }
+                }
+                echo '</font>';
                 if (winner('x', $squares)) {
-                    echo 'X is the winner in this game.';
+                    echo '<strong>X is the winner in this game.</strong>';
                 } else if (winner('o', $squares)) {
-                    echo 'O is the winner in this game.';
+                    echo '<strong>O is the winner in this game.</strong>';
                 } else {
-                    echo 'No winner yet.';
+                    echo '<strong>No winner yet.</strong>';
                 }
             } else {
                 // Imperfect variable response.
-                echo 'Invalid variable response.  Ensure the variable contains exactly nine characters.<br />';
+                echo 'Invalid variable response.  Ensure the variable contains exactly nine (9) characters.<br />';
+                echo 'You have currently entered ' . strlen($position) . ' characters.<br />';
                 echo 'Use x and o for the respective players.  Use - (dash) for an empty square.';
-                
             }
         } else {
             // board variable not found.
@@ -46,43 +54,59 @@ and open the template in the editor.
 
 function winner($token, $position) {
     $won = false;
-    // Row Checking
-    if (($position[0] == $token) &&
-            ($position[1] == $token) &&
-            ($position[2] == $token)) {
+    // Horizontal checking
+    for ($row = 0; $row < 3; $row++) {
         $won = true;
-    } else if (($position[3] == $token) &&
-            ($position[4] == $token) &&
-            ($position[5] == $token)) {
-        $won = true;
-    } else if (($position[6] == $token) &&
-            ($position[7] == $token) &&
-            ($position[8] == $token)) {
-        $won = true;
+        for ($col = 0; $col < 3; $col++) {
+            echo 'checking row cell: ' . $row . ',' . $col;
+            echo '  position: ' . (3 * $row + $col);
+            if ($position[3 * $row + $col] != $token) {
+                $won = false;  // note the negative test
+            }
+            echo '  result: ' . $won . '<br />';
+            if (!$won) {
+                echo 'Skipped checking the rest of this row (row ' . ($row + 1) . ').<br />';
+                break;
+            }
+        }
+        if ($won) {
+            break;
+        }
     }
-    // Column Checking
-    else if (($position[0] == $token) &&
-            ($position[3] == $token) &&
-            ($position[6] == $token)) {
-        $won = true;
-    } else if (($position[1] == $token) &&
-            ($position[4] == $token) &&
-            ($position[7] == $token)) {
-        $won = true;
-    } else if (($position[2] == $token) &&
-            ($position[5] == $token) &&
-            ($position[8] == $token)) {
-        $won = true;
+    if (!$won) {
+        // Vertical checking
+        for ($col = 0; $col < 3; $col++) {
+            $won = true;
+            for ($row = 0; $row < 3; $row++) {
+                echo 'checking column cell: ' . $row . ',' . $col;
+                echo '  position: ' . (3 * $row + $col);
+                if ($position[3 * $row + $col] != $token) {
+                    $won = false;  // note the negative test
+                }
+                echo '  result: ' . $won . '<br />';
+                if (!$won) {
+                    echo 'Skipped checking the rest of this column (column ' . ($col + 1) . ').<br />';
+
+                    break;
+                }
+            }
+            if ($won) {
+                break;
+            }
+        }
     }
-    // Diagonal Checking
-    else if (($position[0] == $token) &&
-            ($position[4] == $token) &&
-            ($position[8] == $token)) {
-        $won = true;
-    } else if (($position[2] == $token) &&
-            ($position[4] == $token) &&
-            ($position[6] == $token)) {
-        $won = true;
+    if (!$won) {
+        // Diagonal Checking
+        echo 'checking diagonals...<br />';
+        if (($position[0] == $token) &&
+                ($position[4] == $token) &&
+                ($position[8] == $token)) {
+            $won = true;
+        } else if (($position[2] == $token) &&
+                ($position[4] == $token) &&
+                ($position[6] == $token)) {
+            $won = true;
+        }
     }
     return $won;
 }
