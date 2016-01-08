@@ -12,32 +12,17 @@ and open the template in the editor.
     <body>
         <?php
         // put your code here
-        $DEBUG = false;
-        if (isset($_GET['debug'])) {
-            // Debug variable declared
-            $DEBUG = true;
-        }
         if (isset($_GET['board'])) {
             // board variable found
             $position = $_GET['board'];
             if (strlen($position) == 9) {
                 // Perfect variable response.  Continuing...
-                $squares = str_split($position);
-                // Debug - Display Draft Game Grid
-                if ($DEBUG) {
-                    echo '<font face="courier" size="5">';
-                    for ($x = 0; $x < 9; $x++) {
-                        echo $squares[$x];
-                        if (($x + 1) % 3 == 0) {
-                            echo '<br />';
-                        }
-                    }
-                    echo '</font>';
-                }
+                // Start Game Board
+                $game = new Game($position);
 
-                if (winner('x', $squares, $DEBUG)) {
+                if ($game->winner('x')) {
                     echo '<strong>X is the winner in this game.</strong>';
-                } else if (winner('o', $squares, $DEBUG)) {
+                } else if ($game->winner('o')) {
                     echo '<strong>O is the winner in this game.</strong>';
                 } else {
                     echo '<strong>No winner yet.</strong>';
@@ -61,52 +46,52 @@ and open the template in the editor.
 
 <?php
 
-function winner($token, $position, $DEBUG) {
-    $won = false;
-    // Horizontal checking
-    for ($row = 0; $row < 3; $row++) {
-        $won = true;
-        for ($col = 0; $col < 3; $col++) {
-            if ($DEBUG) {
-                echo 'checking row cell: ' . $row . ',' . $col;
-                echo '  position: ' . (3 * $row + $col);
-            }
-            if ($position[3 * $row + $col] != $token) {
-                $won = false;  // note the negative test
-            }
-            if ($DEBUG) {
-                echo '  result: ' . $won . '<br />';
-            }
-            if (!$won) {
-                if ($DEBUG) {
-                    echo '<i>Skipped checking the rest of this row (row ' . ($row + 1) . ').</i><br />';
-                }
-                break;
-            }
+class Game {
+
+    var $position;
+    var $board;
+    var $DEBUG = false;
+
+    function __construct($squares) {
+        $this->board = $squares;
+        $this->position = str_split($squares);
+
+        if (isset($_GET['debug'])) {
+            // Debug variable declared
+            $this->DEBUG = true;
         }
-        if ($won) {
-            break;
+
+        if ($this->DEBUG) {
+            echo '<font face="courier" size="5">';
+            for ($x = 0; $x < 9; $x++) {
+                echo $this->board[$x];
+                if (($x + 1) % 3 == 0) {
+                    echo '<br />';
+                }
+            }
+            echo '</font>';
         }
     }
-    if (!$won) {
-        // Vertical checking
-        for ($col = 0; $col < 3; $col++) {
+
+    function winner($token) {
+        $won = false;
+        // Horizontal checking
+        for ($row = 0; $row < 3; $row++) {
             $won = true;
-            for ($row = 0; $row < 3; $row++) {
-                if ($DEBUG) {
-                    echo 'checking column cell: ' . $row . ',' . $col;
+            for ($col = 0; $col < 3; $col++) {
+                if ($this->DEBUG) {
+                    echo 'checking row cell: ' . $row . ',' . $col;
                     echo '  position: ' . (3 * $row + $col);
                 }
-                if ($position[3 * $row + $col] != $token) {
+                if ($this->position[3 * $row + $col] != $token) {
                     $won = false;  // note the negative test
                 }
-                if ($DEBUG) {
+                if ($this->DEBUG) {
                     echo '  result: ' . $won . '<br />';
                 }
-
                 if (!$won) {
-                    if ($DEBUG) {
-                        echo '<i>Skipped checking the rest of this column (column ' . ($col + 1) . ').</i><br />';
+                    if ($this->DEBUG) {
+                        echo '<i>Skipped checking the rest of this row (row ' . ($row + 1) . ').</i><br />';
                     }
                     break;
                 }
@@ -115,22 +100,51 @@ function winner($token, $position, $DEBUG) {
                 break;
             }
         }
-    }
-    if (!$won) {
-        // Diagonal Checking
-        if ($DEBUG) {
-            echo 'checking diagonals...<br />';
+        if (!$won) {
+            // Vertical checking
+            for ($col = 0; $col < 3; $col++) {
+                $won = true;
+                for ($row = 0; $row < 3; $row++) {
+                    if ($this->DEBUG) {
+                        echo 'checking column cell: ' . $row . ',' . $col;
+                        echo '  position: ' . (3 * $row + $col);
+                    }
+                    if ($this->position[3 * $row + $col] != $token) {
+                        $won = false;  // note the negative test
+                    }
+                    if ($this->DEBUG) {
+                        echo '  result: ' . $won . '<br />';
+                    }
+
+                    if (!$won) {
+                        if ($this->DEBUG) {
+                            echo '<i>Skipped checking the rest of this column (column ' . ($col + 1) . ').</i><br />';
+                        }
+                        break;
+                    }
+                }
+                if ($won) {
+                    break;
+                }
+            }
         }
-        if (($position[0] == $token) &&
-                ($position[4] == $token) &&
-                ($position[8] == $token)) {
-            $won = true;
-        } else if (($position[2] == $token) &&
-                ($position[4] == $token) &&
-                ($position[6] == $token)) {
-            $won = true;
+        if (!$won) {
+            // Diagonal Checking
+            if ($this->DEBUG) {
+                echo 'checking diagonals...<br />';
+            }
+            if (($this->position[0] == $token) &&
+                    ($this->position[4] == $token) &&
+                    ($this->position[8] == $token)) {
+                $won = true;
+            } else if (($this->position[2] == $token) &&
+                    ($this->position[4] == $token) &&
+                    ($this->position[6] == $token)) {
+                $won = true;
+            }
         }
+        return $won;
     }
-    return $won;
+
 }
 ?>
