@@ -10,6 +10,7 @@ and open the template in the editor.
         <title>Ken's Tic Tac Toe</title>
     </head>
     <body>
+        <p>Welcome to Ken's PHP Tic Tac Toe game.</p>
         <?php
         // put your code here
         if (isset($_GET['board'])) {
@@ -24,21 +25,22 @@ and open the template in the editor.
                     echo '<strong>X is the winner in this game.</strong>';
                 } else if ($game->winner('o')) {
                     echo '<strong>O is the winner in this game.</strong>';
+                } else if ($position == '---------') {
+                    echo 'A new game as started.  Click on a dash to mark your territory!';
                 } else {
                     echo '<strong>No winner yet.</strong>';
                 }
             } else {
                 // Imperfect variable response.
-                echo 'Invalid variable response.  Ensure the variable contains exactly nine (9) characters.<br />';
-                echo 'You have currently entered ' . strlen($position) . ' characters.<br />';
-                echo 'Use x and o for the respective players.  Use - (dash) for an empty square.';
+                echo 'Invalid game board.  Ensure the variable contains exactly nine (9) characters.<br />';
+                echo 'There are currently ' . strlen($position) . ' characters on the game board.<br />';
+                echo 'Either fix the game board variable in the URL, click the browser back button,'
+                . ' or <a href="?board=---------">click here to start a new game</a>.';
             }
         } else {
-            // board variable not found.
-            echo 'PHP GET variable "board" not found. <br />';
-            echo 'Please append the following to the URL above: <br /><br />';
-            echo '?board=--------- <br /><br />';
-            echo 'where each individual dash is a place in the tic tac toe board, going left to right, up to down.';
+            // board variable not found.  Creating none now...
+            $game = new Game('---------');
+            echo 'A new game as started.  Click on a dash to mark your territory!';
         }
         ?>
     </body>
@@ -60,22 +62,45 @@ class Game {
             // Debug variable declared
             $this->DEBUG = true;
         }
-
-        if ($this->DEBUG) {
-            echo '<font face="courier" size="5">';
-            for ($x = 0; $x < 9; $x++) {
-                echo $this->board[$x];
-                if (($x + 1) % 3 == 0) {
-                    echo '<br />';
-                }
-            }
-            echo '</font>';
+        if ($this->winner('x') || $this->winner('o')) {
+            $this->gameOver();
+        } else {
+            $this->displayGrid();
         }
+    }
+
+    function displayGrid() {
+        echo '<table cols="3" style="font-size:large; font-weight:bold">'; // starts table
+        echo '<tr>'; // opens the first row
+        for ($pos = 0; $pos < 9; $pos++) {
+            echo $this->show_cell($pos);
+            if ($pos % 3 == 2) {
+                echo '</tr><tr>'; // Start new row
+            }
+        }
+        echo '</tr>'; // closes the last row
+        echo '</table>'; // closes table
+        echo '<hr />';  // separates the game board from results
+    }
+
+    function show_cell($which) {
+        $token = $this->position[$which];
+// deal with the easy case
+        if ($token <> '-') {
+            return '<td>' . $token . '</td>';
+        }
+// now the card case
+        $this->newposition = $this->position; // copy original
+        $this->newposition[$which] = 'x'; // this would be their move
+        $move = implode($this->newposition); // make a string from board array
+        $link = '?board=' . $move; // this is what we want the link to be
+// so return cell containing an anchor and showing a hyphen
+        return '<td><a href="' . $link . '">-</a></td>';
     }
 
     function winner($token) {
         $won = false;
-        // Horizontal checking
+// Horizontal checking
         for ($row = 0; $row < 3; $row++) {
             $won = true;
             for ($col = 0; $col < 3; $col++) {
@@ -101,7 +126,7 @@ class Game {
             }
         }
         if (!$won) {
-            // Vertical checking
+// Vertical checking
             for ($col = 0; $col < 3; $col++) {
                 $won = true;
                 for ($row = 0; $row < 3; $row++) {
@@ -129,7 +154,7 @@ class Game {
             }
         }
         if (!$won) {
-            // Diagonal Checking
+// Diagonal Checking
             if ($this->DEBUG) {
                 echo 'checking diagonals...<br />';
             }
@@ -144,6 +169,20 @@ class Game {
             }
         }
         return $won;
+    }
+
+    function gameOver() {
+        echo '<table cols="3" style="font-size:large; font-weight:bold">'; // starts table
+        echo '<tr>'; // opens the first row
+        for ($pos = 0; $pos < 9; $pos++) {
+            echo '<td>' . $this->position[$pos] . '</td>'; // display final result.  no links.
+            if ($pos % 3 == 2) {
+                echo '</tr><tr>'; // Start new row
+            }
+        }
+        echo '</tr>'; // closes the last row
+        echo '</table>'; // closes table
+        echo '<hr />';  // separates the game board from results
     }
 
 }
