@@ -15,7 +15,7 @@ and open the template in the editor.
         // put your code here
         if (isset($_GET['board'])) {
             // board variable found
-            $position = $_GET['board'];
+            $position = trim($_GET['board']);
             if (strlen($position) == 9) {
                 // Perfect variable response.  Continuing...
                 // Start Game Board
@@ -26,10 +26,14 @@ and open the template in the editor.
                 } else if ($game->winner('o')) {
                     echo '<strong>O is the winner in this game.</strong>';
                 } else if ($position == '---------') {
-                    echo 'A new game as started.  Click on a dash to mark your territory!';
+                    echo 'A new game as started.  Click on a dash to mark your territory with an X!';
                 } else {
                     echo '<strong>No winner yet.</strong>';
                 }
+            } else if (strlen($position) == 0) {
+                // variable exist, but empty
+                $game = new Game('---------');
+                echo 'A new game as started.  Click on a dash to mark your territory with an X!';
             } else {
                 // Imperfect variable response.
                 echo 'Invalid game board.  Ensure the variable contains exactly nine (9) characters.<br />';
@@ -38,9 +42,9 @@ and open the template in the editor.
                 . ' or <a href="?board=---------">click here to start a new game</a>.';
             }
         } else {
-            // board variable not found.  Creating none now...
+            // board variable not found.  Creating one now...
             $game = new Game('---------');
-            echo 'A new game as started.  Click on a dash to mark your territory!';
+            echo 'A new game as started.  Click on a dash to mark your territory with an X!';
         }
         ?>
     </body>
