@@ -21,6 +21,7 @@ PLANNED:
 * Ability to choose whether playing two player locally with a friend or with the AI
 * Win line emphasized (highlighted)
 * Further code optimization
+* Perhaps extract all the in-line CSS into its own css file...maybe.
 
 _I've also have this repository set to continuously deploy to Azure, hence there are these additional files:_
 * _.deployment_
