@@ -26,10 +26,11 @@ and open the template in the editor.
 class Game {
 
     var $position;                     // The Game Board Array
-    var $board      = '---------';     // The Game Board from URL.  Default is an Empty Board.
-    var $debug      = false;           // Secret debug mode :)
-    var $valid_char = ['x', 'o', '-']; // Valid Game Piece Characters.
+    var $board        = '---------';     // The Game Board from URL.  Default is an Empty Board.
+    var $debug        = false;           // Secret debug mode :)
+    var $valid_char   = ['x', 'o', '-']; // Valid Game Piece Characters.
     var $invalid_char;                 // Array for invalid characters.
+    var $winning_line = [];            // The winning line.
 
     /**
      * Class Constructor.
@@ -94,7 +95,7 @@ class Game {
             // Disable game board links
             $this->game_play(false);
             // Display Error Message
-            $this->game_message('too-many-y');
+            $this->game_message('too-many-o');
         } else if ($this->winner('x')) {
             // X as won the game.
             // Disable game board links
@@ -116,6 +117,7 @@ class Game {
         } else {
             // At this point, it's time for the AI to make its move.
             $this->pick_move();
+            // Check if the AI's move was the winning move.
             if ($this->winner('o')) {
                 // O as won the game.
                 // Disable game board links
@@ -151,7 +153,7 @@ class Game {
                 echo $this->show_cell($pos);
             } else {
                 // display final result with no links
-                echo '<td style = "padding: 1em;">' . $this->position[$pos] . '</td>';
+                echo '<td style = "padding: 1em;' . (in_array($pos, $this->winning_line) ? ' background-color: #90EE90;' : ' opacity: 0.5;' ) . '">' . $this->position[$pos] . '</td>';
             }
             if ($pos % 3 == 2) {
                 // Start new row after the third column
@@ -222,8 +224,8 @@ class Game {
                     $move = rand(0, 8);
                 }
                 // A random empty cell has been chosen.  Replace it.
-                $new_board      = substr_replace($board, 'o', $move, 1);
-                
+                $new_board = substr_replace($board, 'o', $move, 1);
+
                 // Regenerate the array to display where the AI moved.
                 $this->position = str_split($new_board);
             }
@@ -331,9 +333,12 @@ class Game {
         // Horizontal checking
         // Iterating through each row
         for ($row = 0; $row < 3; $row++) {
-            $won = true; // Here we're using negative testing.
+            $won                = true; // Here we're using negative testing.
+            $this->winning_line = []; // Clears winning line variable.
             // Iterating throuch the columns in a row
             for ($col = 0; $col < 3; $col++) {
+                // Preemptively store winning line position
+                $this->winning_line[] = 3 * $row + $col;
                 // For debugging purposes
                 if ($this->debug) {
                     echo 'checking row cell: ' . $row . ', ' . $col;
@@ -367,9 +372,12 @@ class Game {
         // Vertical column checking
         // Iterate through each column
         for ($col = 0; $col < 3; $col++) {
-            $won = true; // We're doing negative testing
+            $won                = true; // We're doing negative testing
+            $this->winning_line = []; // Clears winning line variable.
             // Iterate through the rows of a column
             for ($row = 0; $row < 3; $row++) {
+                // Preemptively store winning line position
+                $this->winning_line[] = 3 * $row + $col;
                 // for debugging purposes
                 if ($this->debug) {
                     echo 'checking column cell: ' . $row . ', ' . $col;
@@ -411,15 +419,18 @@ class Game {
                 ($this->position[4] == $token) &&
                 ($this->position[8] == $token)) {
             // A backslash diagonal line win.
+            $this->winning_line = [0, 4, 8];
             return true;
         } else if (($this->position[2] == $token) &&
                 ($this->position[4] == $token) &&
                 ($this->position[6] == $token)) {
             // A forward slash diagonal line win.
+            $this->winning_line = [2, 4, 6];
             return true;
         }
 
         // At this point, no line wins are present.
+        $this->winning_line = [];
         return false;
     }
 

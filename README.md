@@ -12,6 +12,7 @@ FEATURES:
 * Decent sized game board
 * Reset / Start New Game button
 * Decent line checks
+* Winning line emphasized (highlighted), and non-winning squares faded.
 * Error Checking (includes, but not limited to...)
   * Invalid character value(s) in game board URL
   * Invalid character string length in game board URL
@@ -19,7 +20,7 @@ FEATURES:
 
 PLANNED:
 * Ability to choose whether playing two player locally with a friend or with the AI
-* Win line emphasized (highlighted)
+* Ability to choose the grid size (ie 3x3, 4x4, 5x5, etc.)
 * Further code optimization
 * Perhaps extract all the in-line CSS into its own css file...maybe.
 
