@@ -10,11 +10,14 @@ and open the template in the editor.
         <title>Ken's Tic Tac Toe</title>
     </head>
     <body>
-        <p>Welcome to Ken's PHP Tic Tac Toe game.</p>
-        <?php
-        // Initialize PHP Tick Tac Toe Game Engine
-        new Game();
-        ?>
+        <!-- Inline HTML css to prevent selection of text -->
+        <div style="-moz-user-select: none; -webkit-user-select:none; -ms-user-select:none; user-select:none; -moz-user-drag:none; -webkit-user-drag:none; -ms-user-drag:none; user-drag: none;" unselectable="on">
+            <p>Welcome to Ken's PHP Tic Tac Toe game.</p>
+            <?php
+            // Initialize PHP Tick Tac Toe Game Engine
+            new Game();
+            ?>
+        </div>
     </body>
 </html>
 
@@ -25,18 +28,29 @@ and open the template in the editor.
  */
 class Game {
 
-    var $position;                     // The Game Board Array
+    var $position;                       // The Game Board Array
     var $board        = '---------';     // The Game Board from URL.  Default is an Empty Board.
     var $debug        = false;           // Secret debug mode :)
     var $valid_char   = ['x', 'o', '-']; // Valid Game Piece Characters.
-    var $invalid_char;                 // Array for invalid characters.
-    var $winning_line = [];            // The winning line.
+    var $invalid_char;                   // Array for invalid characters.
+    var $grid_size    = 3;               // The game board grid size.
+    var $winning_line = [];              // The winning line.
+    var $win_lines    = [];                 // All possible win lines from game board
 
     /**
      * Class Constructor.
+     * 
+     * Gets and sets the Board size and board pieces
      */
 
     function __construct() {
+        // Checks if the game size variable 'size' exists.
+        if (isset($_GET['size'])) {
+            // Take it from URL.  Trim whitespaces.
+            $this->grid_size = trim($_GET['size']);
+            $this->board     = str_repeat('-', pow($this->grid_size, 2));
+        }
+
         // Checks if the game board variable 'board' exists.
         if (isset($_GET['board'])) {
             // The Game Board variable exists.
@@ -44,7 +58,8 @@ class Game {
             if (strlen(trim($_GET['board'])) == 0) {
                 // Board variable exists, but contains no value.
                 // Treat as new game.
-                $this->board = '---------'; // This is redundant but just in case.
+                // This is redundant but just in case.
+                $this->board = str_repeat('-', pow($this->grid_size, 2));
             } else {
                 // Board variable exists, and contains some characters.
                 // Take it from the URL.  Trim whitespaces and convert to lowercase.
@@ -54,14 +69,73 @@ class Game {
         }
 
         $this->position = str_split($this->board); // From the board variable, convert into the board array.
-        //
         // DEBUG MODE
         if (isset($_GET['debug'])) {
-            $this->debug = true; // Debug variable declared
+            $this->debug = true; // Debug variable declared.  Enable Setting.
+            echo 'Game is running in DEBUGGING Mode.  All Possible Winning Lines are displayed below, while the grid displays additional information.<br />';
         }
+
+        // Generate all Winning Line Combinations
+        $this->generate_win_lines();
 
         // Checks the game board and generate appropriate view.
         $this->game_check();
+    }
+
+    /**
+     * This function generates all possible winning lines, based on the grid size given.
+     * All Horizonal (row), Vertical (column), and Diagonal lines are stored relative to the box array position.
+     * This is a multi-dimentional array, where each line is in its own array.
+     * The array looks like this:  Line Type > Line > box in line.
+     */
+    function generate_win_lines() {
+        $this->win_lines = []; // clear variable first just in case.
+        // This is a special nested for loop system, where it does simultaneous win line generation for all three line types.
+        // Iteration 1
+        for ($a = 0; $a < $this->grid_size; $a++) {
+            $horizontal = []; // temporary array
+            $vertical   = []; // temporary array
+            // Iteration 2
+            for ($b = 0; $b < $this->grid_size; $b++) {
+                // This will append to the temporary row array the position of the row.
+                $horizontal[] = $this->grid_size * $a + $b;
+                // This will append to the temporary column array the position of the column
+                $vertical[]   = $this->grid_size * $b + $a;
+            }
+            // Add the generated row to the overall array.
+            $this->win_lines['Horizontal']['Row ' . ($a + 1)]  = $horizontal;
+            // Add the generated column to the overall array
+            $this->win_lines['Vertical']['Column ' . ($a + 1)] = $vertical;
+            // This will append to the overall array the position of the diagonals
+            $this->win_lines['Diagonal']['backslash'][]        = $this->grid_size * $a + $a;
+            // This will append to the overall array the position of the diagonals
+            $this->win_lines['Diagonal']['forward slash'][]    = $this->grid_size * ($a + 1) - ($a + 1);
+        }
+        // For Testing/Debugging purposes.
+        if ($this->debug) {
+            // Create Table
+            echo '<br /><table border = "1" style="border-collapse: collapse">';
+            // Table Header
+            echo '<caption>All Winning Line Combinations</caption>';
+            // Column Header
+            echo '<thead><tr>';
+            foreach ($this->win_lines as $line_type => $lines) {
+                echo '<th>' . $line_type . '</th>';
+            }
+            echo '</tr></thead>'; // End Column Header
+            // Table Body
+            echo '<tr>'; // First and only row
+            foreach ($this->win_lines as $line_type) {
+                echo '<td><div style="padding:8px;">';
+                foreach ($line_type as $line => $pos) {
+                    // Prints each line in its own 'row'
+                    echo $line . ': [' . implode(',', $pos) . ']<br />';
+                }
+                echo '</div></td>';
+            }
+            echo '</tr>'; // End Row
+            echo '</table>'; // End Table
+        }
     }
 
     /**
@@ -71,15 +145,19 @@ class Game {
         // This will check for any invalid characters in the game board values
         $this->invalid_char = array_diff($this->position, $this->valid_char);
         // Here is where our multitude of checks will be done.
-        if (count($this->invalid_char, COUNT_RECURSIVE) > 0) {
+        if ($this->grid_size % 2 == 0 || $this->grid_size < 3 || $this->grid_size > 15) {
+            // Grid Size not odd or does not meet minimum/maximum size.
+            // For the time being it must be odd so that diagonals can truly be corner to corner.
+            $this->game_message('invalid-size');
+        } else if (count($this->invalid_char, COUNT_RECURSIVE) > 0) {
             // An invalid character was found in the 'board' variable.
             // Display Error Message.
             $this->game_message('invalid-character');
-        } else if (strlen($this->board) <> 9) {
+        } else if (strlen($this->board) <> pow($this->grid_size, 2)) {
             // Invalid Game Board - Does not contain the exact character length for the game board.
             // Display Error Message
             $this->game_message('invalid-board');
-        } else if ($this->board == '---------') {
+        } else if ($this->board == str_repeat('-', pow($this->grid_size, 2))) {
             // This marks the start of a new game.
             $this->game_play(true);
             // Display New Game Message
@@ -96,13 +174,13 @@ class Game {
             $this->game_play(false);
             // Display Error Message
             $this->game_message('too-many-o');
-        } else if ($this->winner('x')) {
+        } else if ($this->win_check('x')) {
             // X as won the game.
             // Disable game board links
             $this->game_play(false);
             // Display Win Message
             $this->game_message('x-win');
-        } else if ($this->winner('o')) {
+        } else if ($this->win_check('o')) {
             // O as won the game.
             // Disable game board links
             $this->game_play(false);
@@ -118,7 +196,7 @@ class Game {
             // At this point, it's time for the AI to make its move.
             $this->pick_move();
             // Check if the AI's move was the winning move.
-            if ($this->winner('o')) {
+            if ($this->win_check('o')) {
                 // O as won the game.
                 // Disable game board links
                 $this->game_play(false);
@@ -139,35 +217,70 @@ class Game {
      * @param boolean $link whether or not to generate links.  If game is over then set to false.
      */
     function game_play($link) {
+        echo '<br />'; // Insert blank line.
+        // Inform player of grid size and rules, only if grid size is greater than a 3x3.
+        if ($this->grid_size > 3) {
+            echo 'NOTE: This is an <strong>advanced ' . ($this->grid_size) . 'x' . ($this->grid_size) . '</strong> game board.<br />';
+            echo 'To be considered a winner, you must <strong>claim an entire line</strong> - that is, <strong>' . $this->grid_size . '</strong> in a line to win.<br />';
+            echo '<i>Diagonals are considered from corner to corner, crossing the middle box.</i><br /><br />';
+        }
         // Change font and size for the HTML table
         echo '<font face = "courier" size = "5">';
         // starts the HTML table
-        echo '<table cols = "3" border = "1" style = "font-weight:bold; border-collapse: collapse">';
+        echo '<table cols = "' . ($this->debug ? $this->grid_size + 2 : $this->grid_size) . '" border = "1" style = "font-weight:bold; border-collapse: collapse">';
+        // For Testing / Debugging, display column number headings.
+        if ($this->debug) {
+            echo '<thead><tr><th></th>';
+            for ($col = 1; $col <= $this->grid_size; $col++) {
+                echo '<th style="padding: 5px;"> Column ' . $col . '</th>';
+            }
+            echo '<th></th></tr></thead>';
+            echo '<tfoot><tr><th></th>';
+            for ($col = 1; $col <= $this->grid_size; $col++) {
+                echo '<th> Column ' . $col . '</th>';
+            }
+            echo '<th></th></tr></tfoot>';
+        }
         // opens the first row
-        echo '<tr>';
+        echo '<tbody><tr>';
+        $row = 1;   // Debugging use only.
+        // For Testing / Debugging, display row number heading.
+        if ($this->debug) {
+            echo '<th style="padding: 5px;">Row ' . $row . '</th>';
+        }
         // Iterates through each of the game board cell
-        for ($pos = 0; $pos < 9; $pos++) {
+        for ($pos = 0; $pos < pow($this->grid_size, 2); $pos++) {
             // Whether or not to generate links
             if ($link) {
                 // Generate the link
                 echo $this->show_cell($pos);
             } else {
                 // display final result with no links
-                echo '<td style = "padding: 1em;' . (in_array($pos, $this->winning_line) ? ' background-color: #90EE90;' : ' opacity: 0.5;' ) . '">' . $this->position[$pos] . '</td>';
+                echo '<td style="text-align:center;' . (in_array($pos, $this->winning_line) ? ' background-color: #90EE90;' : ' opacity: 0.5;' ) . '"><div style="padding: 1em;">' . $this->position[$pos] . ($this->debug ? ('<br /><span style="font-size:66%;">' . $pos . ':(' . $row . ',' . (($pos % $this->grid_size) + 1) . ')</span>') : '') . '</div></td>';
             }
-            if ($pos % 3 == 2) {
-                // Start new row after the third column
-                echo '</tr><tr>';
+            if (($pos + 1) % $this->grid_size == 0) {
+                // For Testing / Debugging, display row number heading.
+                if ($this->debug) {
+                    echo '<th style="padding: 5px;">Row ' . $row++ . '</th>';
+                }
+                if (($pos + 1) != pow($this->grid_size, 2)) {
+                    // Start new row
+                    echo '</tr><tr>';
+                    // For Testing / Debugging, display row number heading.
+                    if ($this->debug) {
+                        echo '<th style="padding: 5px;">Row ' . $row . '</th>';
+                    }
+                }
             }
         }
         // Closes the last row
-        echo '</tr>';
+        echo '</tr></tbody>';
         // Closes the HTML table
         echo '</table>';
         // Ends the font type and size change
         echo '</font>';
         // Separates the game board from the game status
-        echo '<hr />';
+        echo '<br /><hr />';
     }
 
     /**
@@ -184,31 +297,32 @@ class Game {
             // Game cell has already been taken.
             $player_board = str_split($this->board);  // Create temporary array to hold the game board.
             // Returns the HTML code.  If it's the cpu that's moved (the position value stored in the engine is not the same as from the URL link), visually colour it in.
-            return '<td style = "padding: 1em;' . ($this->position[$which] != $player_board[$which] ? ' background-color: #FFA500;' : '' ) . '">' . $token . '</td>';
+            return '<td style="text-align:center;' . ($token != $player_board[$which] ? ' background-color: #FFA500;' : '' ) . '"><div style="padding: 1em;">' . $token . ($this->debug ? ('<br /><span style="font-size:66%;">' . $which . ':(' . ((int) ($which / $this->grid_size) + 1) . ',' . (($which % $this->grid_size) + 1) . ')</span>') : '') . '</div></td>';
         }
         // now the hard case
         $this->newposition         = $this->position;               // Copy original array
         $this->newposition[$which] = 'x';                           // this would be their move
         $move                      = implode($this->newposition);   // make a string from board array
-        $link                      = '?board=' . $move;             // this is what we want the link to be
+        $link                      = '?size=' . $this->grid_size . '&board=' . $move . ($this->debug ? '&debug' : '');             // this is what we want the link to be
         // so return cell containing an anchor and showing a hyphen.
         // Also makes it so that you can click almost anywhere within that table cell.
-        return '<td><a href = "' . $link . '" style = "text-decoration: none;"><div style = "padding: 1em;">-</div></a></td>';
+        return '<td style="text-align:center;"><a href = "' . $link . '" style = "text-decoration: none;"><div style="padding: 1em;">-' . ($this->debug ? ('<br /><span style="font-size:66%;">' . $which . ':(' . ((int) ($which / $this->grid_size) + 1) . ',' . (($which % $this->grid_size) + 1) . ')</span>') : '') . '</div></a></td>';
     }
 
     /**
      * The Main Logic to how my AI would pick a move.
      */
     function pick_move() {
+        echo ($this->debug ? '<br />> The AI is making its move...<br />' : '');
         // Let's check if there's a winning move
-        $ai_win_move = $this->potential_win('o');
+        $ai_win_move = $this->win_check('o');
         if ($ai_win_move != -1) {
             // There is a winning move.  TAKE IT!
             $this->position[$ai_win_move] = 'o';
         } else {
             // There is not a winning move.
             // Let's check if there's a winning move for the player
-            $player_win_move = $this->potential_win('x');
+            $player_win_move = $this->win_check('x');
             if ($player_win_move != -1) {
                 // There is a winning move.  BLOCK IT!
                 $this->position[$player_win_move] = 'o';
@@ -217,11 +331,11 @@ class Game {
                 // Select random empty cell.
                 $board = implode($this->position);
                 // Let's try to take the middle cell first.
-                $move  = 4;
+                $move  = round((pow($this->grid_size, 2) / 2), PHP_ROUND_HALF_ODD);
                 // Loops until we have randomly selected an empty cell.
                 while (substr($board, $move, 1) != '-') {
                     // Generate a random number
-                    $move = rand(0, 8);
+                    $move = rand(0, (pow($this->grid_size, 2) - 1));
                 }
                 // A random empty cell has been chosen.  Replace it.
                 $new_board = substr_replace($board, 'o', $move, 1);
@@ -233,205 +347,91 @@ class Game {
     }
 
     /**
-     * This will check if there is a potential winning move.
+     * This function will check for wins, either for the overall game or for the AI.
      * 
      * @param string $token This is usually x or o.
-     * @return number  The game cell number of the potential win, or -1 if it can't find one.
+     * @return number/boolean Depending on the parent function that called this.
+     *     (pick_move) The game cell number of the potential win, or -1 if it can't find one.
+     *     (game_check) This will return whether or not there is a winning line.
      */
-    function potential_win($token) {
-        // Check board for potential winning moves for token.
-        // Horizontal row checking
-        for ($row = 0; $row < 3; $row++) {
-            $check_value = 0; // A temporary calculation variable.
-            $win_move    = 0; // The Game Board Cell location.
-            // Iterate through the column of a row
-            for ($col = 0; $col < 3; $col++) {
-                // Checks if the token matches what's currently in the game cell.
-                if ($this->position[3 * $row + $col] != $token) {
-                    // It's not a match - it could be a potential win cell now.
-                    $win_move = 3 * $row + $col;
-                } else {
-                    // It contains that token.  Score one for that row.
-                    $check_value++;
-                }
-            }
-            // If that row contains two token out of three...
-            if ($check_value == 2) {
-                // Check if the potential win cell is empty.
-                if ($this->position[$win_move] == '-') {
-                    // That cell is empty.  Take it for the win or block!
-                    return $win_move;
-                }
-            }
+    function win_check($token) {
+        if ($this->debug && debug_backtrace()[1]['function'] == 'game_check') {
+            echo '<br />> Check function called from Game for token ' . $token . '...<br />';
         }
-        // At this point no horizontal rows have any potential wins.
-        // Vertical column checking
-        for ($col = 0; $col < 3; $col++) {
-            $check_value = 0; // A temporary calculation variable.
-            $win_move    = 0; // The Game Board Cell location.
-            // Iterate through the row of a column
-            for ($row = 0; $row < 3; $row++) {
-                // Checks if the token matches what's currently in that game cell.
-                if ($this->position[3 * $row + $col] != $token) {
-                    // It's not a match - perhaps a potential win cell.
-                    $win_move = 3 * $row + $col;
-                } else {
-                    // It contains that token.  Score one for that column.
-                    $check_value++;
-                }
-            }
-            // If that column contains two tokens out of three...
-            if ($check_value == 2) {
-                // Check if the potential win cell is empty.
-                if ($this->position[$win_move] == '-') {
-                    // That cell is empty.  Take it for the win or block!
-                    return $win_move;
-                }
-            }
-        }
-        // At this point no horizontal or vertical rows have any potential wins.
-        // Diagonal line Checking
-        $diagonals = [[0, 4, 8], [2, 4, 6]]; // The cell locations for the diagonal lines.
-        // Checking each diagonal line.
-        foreach ($diagonals as $line) {
-            $check_value = 0; // A temporary calculation variable.
-            $win_move    = 0; // The Game Board Cell location.
-            // Checking each cell for a line
-            foreach ($line as $pos) {
-                // Checks if the token matches what's currently in that game cell.
-                if ($this->position[$pos] != $token) {
-                    // It's not a match - perhaps a potential win cell.
-                    $win_move = $pos;
-                } else {
-                    // It's a match.  Score one for that line.
-                    $check_value++;
-                }
-            }
-            // If that line contains two tokens out of three...
-            if ($check_value == 2) {
-                // Check if the potential win cell is empty
-                if ($this->position[$win_move] == '-') {
-                    // That cell is empty.  Take it for the win or block.
-                    return $win_move;
-                }
-            }
-        }
-        // If we have reached this point, then there are no winning moves available for that token.
-        return -1;
-    }
 
-    /**
-     * Determine if a win has been made by a token.
-     * 
-     * Here is where the Debug messages are shown if specified.
-     * 
-     * @param string $token Usually either x or o.
-     * @return boolean Returns TRUE if won, FALSE otherwise.
-     */
-    function winner($token) {
-        $won = false; // By default, set to no win yet.
-        // Horizontal checking
-        // Iterating through each row
-        for ($row = 0; $row < 3; $row++) {
-            $won                = true; // Here we're using negative testing.
-            $this->winning_line = []; // Clears winning line variable.
-            // Iterating throuch the columns in a row
-            for ($col = 0; $col < 3; $col++) {
-                // Preemptively store winning line position
-                $this->winning_line[] = 3 * $row + $col;
-                // For debugging purposes
-                if ($this->debug) {
-                    echo 'checking row cell: ' . $row . ', ' . $col;
-                    echo ' position: ' . (3 * $row + $col);
-                }
-                // Checks if the token is not in the game cell.
-                if ($this->position[3 * $row + $col] != $token) {
-                    $won = false;  // note the negative test
-                }
-                // For debugging purposes
-                if ($this->debug) {
-                    echo ' result: ' . $won . '<br />';
-                }
-                // When the first non-win cell has been reached...
-                if (!$won) {
-                    // For debugging purposes
-                    if ($this->debug) {
-                        echo '<i>Skipped checking the rest of this row (row ' . ($row + 1) . ').</i><br />';
+        // If called from pick_move, check board for potential winning moves for token.
+        // If called from game_check, check board for winning line for token
+        $this->winning_line = []; // clear the variable first, just in case.
+        // Iterating through all the possible winning lines.
+        foreach ($this->win_lines as $line_type => $lines) {
+            // Iterating through each line.
+            foreach ($lines as $line_name => $line) {
+                $this->winning_line[] = $line; // Preemptively store winning line position
+                $check_value          = 0;     // A temporary calculation variable.
+                $win_move             = 0;     // The Game Board Cell location.
+                // Checking each cell within a line
+                foreach ($line as $pos) {
+                    // For Debug / Testing
+                    if ($this->debug && debug_backtrace()[1]['function'] == 'game_check') {
+                        echo 'Checking for token ' . $token . ' in ' . $line_type . ' ' . $line_name . ' [' . implode(',', $line) . ']';
                     }
-                    // Stop checking the current row and move on.
-                    break;
-                }
-            }
-            // If all three columns of that row is true, we have a horizontal row winner.
-            if ($won) {
-                // Horizontal row winner - stop checking everything else.
-                return true;
-            }
-        }
-
-        // Vertical column checking
-        // Iterate through each column
-        for ($col = 0; $col < 3; $col++) {
-            $won                = true; // We're doing negative testing
-            $this->winning_line = []; // Clears winning line variable.
-            // Iterate through the rows of a column
-            for ($row = 0; $row < 3; $row++) {
-                // Preemptively store winning line position
-                $this->winning_line[] = 3 * $row + $col;
-                // for debugging purposes
-                if ($this->debug) {
-                    echo 'checking column cell: ' . $row . ', ' . $col;
-                    echo ' position: ' . (3 * $row + $col);
-                }
-                // Checks if the token is not in the game cell.
-                if ($this->position[3 * $row + $col] != $token) {
-                    $won = false;  // note the negative test
-                }
-                // For debugging purposes
-                if ($this->debug) {
-                    echo ' result: ' . $won . '<br />';
-                }
-
-                // When the first non-win cell has been reached...
-                if (!$won) {
-                    // For debugging purposes
-                    if ($this->debug) {
-                        echo '<i>Skipped checking the rest of this column (column ' . ($col + 1) . ').</i><br />';
+                    // Checks if the token matches what's currently in that game cell.
+                    if ($this->position[$pos] != $token) {
+                        // Token does not match checked position.
+                        if (debug_backtrace()[1]['function'] == 'game_check') {
+                            if ($this->debug) {
+                                echo ' - Position ' . $pos . '.  Result:  Not Found.  Skipping rest of ' . $line_name . '<br />';
+                            }
+                            // Win Line Check Mode - no need to proceed further with this line.
+                            break;
+                        } else if (debug_backtrace()[1]['function'] == 'pick_move') {
+                            // Perhaps a potential win cell.
+                            $win_move = $pos;
+                        }
+                    } else {
+                        if ($this->debug && debug_backtrace()[1]['function'] == 'game_check') {
+                            echo ' - Position ' . $pos . '.  Result:  Found.<br />';
+                        }
+                        // It's a match.  Score one for that line.
+                        $check_value++;
                     }
-                    // Stop checking the current column and move on.
-                    break;
+                }
+
+                // Depending on the parent function that called this method...
+                if (debug_backtrace()[1]['function'] == 'pick_move') {
+                    // The AI's pick_move area
+                    // If that line is just missing one of the same token...
+                    if ($check_value == ($this->grid_size - 1)) {
+                        // Check if the potential win cell is empty
+                        if ($this->position[$win_move] == '-') {
+                            // That cell is empty.  Take it for the win or block.
+                            return $win_move;
+                        }
+                    }
+                } else if (debug_backtrace()[1]['function'] == 'game_check') {
+                    // The overall game for winning line.
+                    if ($check_value == $this->grid_size) {
+                        if ($this->debug) {
+                            echo 'We have a winner!<br />';
+                        }
+                        // It's a winner.
+                        return true;
+                    }
                 }
             }
-            // If all three rows of that column is true, we have a vertical column winner.
-            if ($won) {
-                // Vertical column winner - stop checking everything else.
-                return true;
-            }
         }
-
-        // Diagonal line Checking
-        // For debugging purposes
-        if ($this->debug) {
-            echo 'checking diagonals...<br />';
+        // If we have reached this point, then there are no wins for that token.
+        $this->winning_line = []; // Clear the winning_line variable.
+        if (debug_backtrace()[1]['function'] == 'game_check') {
+            // For the game_check function
+            return false;
+        } else if (debug_backtrace()[1]['function'] == 'pick_move') {
+            // For the AI pick_move function.
+            return -1;
+        } else {
+            // an unintended function called this...
+            return null;
         }
-        // Checks the cell that corresponds to a diagonal line.
-        if (($this->position[0] == $token) &&
-                ($this->position[4] == $token) &&
-                ($this->position[8] == $token)) {
-            // A backslash diagonal line win.
-            $this->winning_line = [0, 4, 8];
-            return true;
-        } else if (($this->position[2] == $token) &&
-                ($this->position[4] == $token) &&
-                ($this->position[6] == $token)) {
-            // A forward slash diagonal line win.
-            $this->winning_line = [2, 4, 6];
-            return true;
-        }
-
-        // At this point, no line wins are present.
-        $this->winning_line = [];
-        return false;
     }
 
     /**
@@ -443,8 +443,13 @@ class Game {
         $newGame = true; // This is for the new game button
         // Display a specific message to the player.
         switch ($message) {
+            case 'invalid-size':
+                echo 'Invalid Game Board Size.  The board must be an <strong>odd number</strong> starting at 3 and up to 15 (for performance reasons).<br />';
+                echo 'Your proposed game board size was <strong>' . $this->grid_size . '</strong>.<br />';
+                echo 'Either fix the game board size variable values in the URL or Start a new game by clicking on the button below.';
+                break;
             case 'invalid-board':
-                echo 'Invalid game board. Ensure the variable "board" contains exactly nine (9) characters.<br />';
+                echo 'Invalid game board. As the game board size is set to ' . $this->grid_size . ' by ' . $this->grid_size . ', please ensure the variable "board" contains exactly ' . pow($this->grid_size, 2) . ' characters.<br />';
                 echo 'There are currently <strong>' . strlen($this->board) . '</strong> characters on the game board.<br />';
                 echo 'Either fix the game board variable values in the URL or Start a new game by clicking on the button below.';
                 break;
@@ -455,8 +460,23 @@ class Game {
                 break;
             case 'new-game':
                 echo 'A new game as started. Since I am the game host, I\'ll let you start first.<br />';
-                echo 'Click on a dash to mark that territory with an X flag!';
-                $newGame = false; // Do not display the New Game Button.
+                echo 'Click on a dash to mark that territory with an X flag!<br /><br />';
+                echo 'Psst - if you want to change the game board size, click on one of the button(s) below:<br />';
+                echo '<i>These button(s) are only available during a new game (before any boxes are marked).</i><br /><br />';
+                if ($this->grid_size > 3) {
+                    echo '<a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . ($this->grid_size - 2) . ($this->debug ? '&debug' : '') . '" style="display: inline-block; -webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">I can\'t take it - DECREASE the board size (to ' . ($this->grid_size - 2) . 'x' . ($this->grid_size - 2) . ')!' . ($this->debug ? ' - in DEBUG mode' : '') . '</a>';
+                    echo '<br />';
+                    echo '<a draggable="false" href="' . $_SERVER['PHP_SELF'] . ($this->debug ? '&debug' : '') . '" style="display: inline-block; -webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Back to the basics - RESET to a normal 3x3 board!' . ($this->debug ? ' - in DEBUG mode' : '') . '</a>';
+                    echo '<br />';
+                }
+                if ($this->grid_size < 15) {
+                    echo '<a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . ($this->grid_size + 2) . ($this->debug ? '&debug' : '') . '" style="display: inline-block; -webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">It\'s not challenging enough - INCREASE the game board size (to ' . ($this->grid_size + 2) . 'x' . ($this->grid_size + 2) . ')!' . ($this->debug ? ' - in DEBUG mode' : '') . '</a>';
+                } else {
+                    echo '<br /><i>For performance reasons, the current max size of the board is 15x15.  Is this not challenging enough for you?</i>';
+                }
+                if (!$this->debug) {
+                    $newGame = false; // Do not display the New Game Button.
+                }
                 break;
             case 'too-many-x':
                 echo 'ERROR DETECTED - There are too many Xs on the game board.  QUIT CHEATING!';
@@ -485,7 +505,10 @@ class Game {
         // Are we displaying the new game button...
         if ($newGame) {
             // This is a HTML link with in-line CSS button styling.
-            echo '<br /><br /><a href="' . $_SERVER['PHP_SELF'] . '" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game!</a>';
+            echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game (no debug info)!</a>';
+            if ($this->debug) {
+                echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '&debug" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game with debugging info!</a>';
+            }
         }
     }
 
