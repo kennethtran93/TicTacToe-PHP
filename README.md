@@ -5,10 +5,6 @@ Everything is contained inside the index.php file.
 
 The Game class contains everything needed to run the game.  Simply initialize/instantiate the class inside the `<body>` tag to begin.
 
-NEW in v1.5:
-* FEATURE:  Ability to choose the grid size (ie 3x3, 5x5, etc. up to 15x15)
-* OTHER:  Code Optimizations to reduce the file size.
-
 FEATURES:
 * Single-Player Mode Only
 * Decent AI logical programming
@@ -24,6 +20,8 @@ FEATURES:
 
 PLANNED:
 * Ability to choose whether playing two player locally with a friend or with the AI
+* Ability to choose the grid size (ie 3x3, 4x4, 5x5, etc.)
+* Further code optimization
 * Perhaps extract all the in-line CSS into its own css file...maybe.
 
 _I've also have this repository set to continuously deploy to Azure, hence there are these additional files:_

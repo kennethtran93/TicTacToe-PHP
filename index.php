@@ -313,6 +313,7 @@ class Game {
      * The Main Logic to how my AI would pick a move.
      */
     function pick_move() {
+        // For Testing / Debugging Notice
         echo ($this->debug ? '<br />> The AI is making its move...<br />' : '');
         // Let's check if there's a winning move
         $ai_win_move = $this->win_check('o');
@@ -355,6 +356,7 @@ class Game {
      *     (game_check) This will return whether or not there is a winning line.
      */
     function win_check($token) {
+        // For Testing / Debugging Notice
         if ($this->debug && debug_backtrace()[1]['function'] == 'game_check') {
             echo '<br />> Check function called from Game for token ' . $token . '...<br />';
         }
@@ -379,6 +381,8 @@ class Game {
                     if ($this->position[$pos] != $token) {
                         // Token does not match checked position.
                         if (debug_backtrace()[1]['function'] == 'game_check') {
+                            // For Testing / Debugging Notice
+
                             if ($this->debug) {
                                 echo ' - Position ' . $pos . '.  Result:  Not Found.  Skipping rest of ' . $line_name . '<br />';
                             }
@@ -389,6 +393,7 @@ class Game {
                             $win_move = $pos;
                         }
                     } else {
+                        // For Testing / Debugging Notice
                         if ($this->debug && debug_backtrace()[1]['function'] == 'game_check') {
                             echo ' - Position ' . $pos . '.  Result:  Found.<br />';
                         }
@@ -411,6 +416,7 @@ class Game {
                 } else if (debug_backtrace()[1]['function'] == 'game_check') {
                     // The overall game for winning line.
                     if ($check_value == $this->grid_size) {
+                        // For Testing / Debugging Notice
                         if ($this->debug) {
                             echo 'We have a winner!<br />';
                         }
@@ -474,6 +480,8 @@ class Game {
                 } else {
                     echo '<br /><i>For performance reasons, the current max size of the board is 15x15.  Is this not challenging enough for you?</i>';
                 }
+                // For Testing / Debugging Notice
+
                 if (!$this->debug) {
                     $newGame = false; // Do not display the New Game Button.
                 }
@@ -505,7 +513,8 @@ class Game {
         // Are we displaying the new game button...
         if ($newGame) {
             // This is a HTML link with in-line CSS button styling.
-            echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game (no debug info)!</a>';
+            echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game' . ($this->debug ? ' (no debug info)' : '') . '!</a>';
+            
             if ($this->debug) {
                 echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '&debug" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game with debugging info!</a>';
             }
