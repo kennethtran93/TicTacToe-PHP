@@ -180,6 +180,8 @@ class Game {
             $this->game_play(false);
             // Display Win Message
             $this->game_message('x-win');
+            // Create a (small) game win file
+            $this->win_file();
         } else if ($this->win_check('o')) {
             // O as won the game.
             // Disable game board links
@@ -256,7 +258,7 @@ class Game {
                 echo $this->show_cell($pos);
             } else {
                 // display final result with no links
-                echo '<td style="text-align:center;' . (in_array($pos, $this->winning_line) ? ' background-color: #90EE90;' : ' opacity: 0.5;' ) . '"><div style="padding: 1em;">' . $this->position[$pos] . ($this->debug ? ('<br /><span style="font-size:66%;">' . $pos . ':(' . $row . ',' . (($pos % $this->grid_size) + 1) . ')</span>') : '') . '</div></td>';
+                echo '<td style="text-align:center;' . (in_array($pos, $this->winning_line[0]) ? ' background-color: #90EE90;' : ' opacity: 0.5;' ) . '"><div style="padding: 1em;">' . $this->position[$pos] . ($this->debug ? ('<br /><span style="font-size:66%;">' . $pos . ':(' . $row . ',' . (($pos % $this->grid_size) + 1) . ')</span>') : '') . '</div></td>';
             }
             if (($pos + 1) % $this->grid_size == 0) {
                 // For Testing / Debugging, display row number heading.
@@ -368,9 +370,9 @@ class Game {
         foreach ($this->win_lines as $line_type => $lines) {
             // Iterating through each line.
             foreach ($lines as $line_name => $line) {
-                $this->winning_line[] = $line; // Preemptively store winning line position
-                $check_value          = 0;     // A temporary calculation variable.
-                $win_move             = 0;     // The Game Board Cell location.
+                $this->winning_line[0] = $line; // Preemptively store winning line position
+                $check_value           = 0;     // A temporary calculation variable.
+                $win_move              = 0;     // The Game Board Cell location.
                 // Checking each cell within a line
                 foreach ($line as $pos) {
                     // For Debug / Testing
@@ -514,10 +516,31 @@ class Game {
         if ($newGame) {
             // This is a HTML link with in-line CSS button styling.
             echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game' . ($this->debug ? ' (no debug info)' : '') . '!</a>';
-            
+
             if ($this->debug) {
                 echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '&debug" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game with debugging info!</a>';
             }
+        }
+    }
+
+    /**
+     * Create a small Comma Seperated Values file to keep track of all wins.
+     * Inside file:  Timestamp (with microseconds), IP Address, Board Size, Win Line
+     */
+    function win_file() {
+        // Generate Filename
+        $filename = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . ".board_" . $this->grid_size;
+        // Create File
+        $winfile  = fopen("wins/" . $filename, 'w');
+        // Generate file line content
+        $txt      = microtime(TRUE) . "," . $_SERVER['REMOTE_ADDR'] . "," . $this->grid_size . "," . $this->board;
+        // Write/Save to file.
+        fwrite($winfile, $txt);
+        // Close file.
+        fclose($winfile);
+        
+        if ($this->debug) {
+            echo "<br /><br /> Win Stat for this game written to file: " . $filename;
         }
     }
 
