@@ -562,7 +562,7 @@ class Game {
         $loseP = 0.00;
         $tieP  = 0.00;
 
-        echo "<br />";
+        echo "<br /><br /><br />";
 
         if ($games > 0) {
             $winP  = (double) $wins / (double) $games;
