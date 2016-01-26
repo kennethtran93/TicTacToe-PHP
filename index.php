@@ -562,10 +562,10 @@ class Game {
      * Generate Game Statistics
      */
     function game_stats() {
-        $wins  = count(glob("stats/" . $this->grid_size . "/*.win") or null);
-        $loses = count(glob("stats/" . $this->grid_size . "/*.lose") or null);
-        $ties  = count(glob("stats/" . $this->grid_size . "/*.tie") or null);
-        $games = count(glob("stats/" . $this->grid_size . "/*.*") or null);
+        $wins  = count(glob("stats/" . $this->grid_size . "/*.win"));
+        $loses = count(glob("stats/" . $this->grid_size . "/*.lose"));
+        $ties  = count(glob("stats/" . $this->grid_size . "/*.tie"));
+        $games = count(glob("stats/" . $this->grid_size . "/*.*"));
         $winP  = 0.00;
         $loseP = 0.00;
         $tieP  = 0.00;
