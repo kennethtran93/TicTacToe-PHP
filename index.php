@@ -537,18 +537,25 @@ class Game {
      */
     function game_file($stat) {
         // Generate Filename
-        $filename = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . "." . $stat;
+        $file_name = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . "." . $stat;
+        // Generate Path
+        $path = "stats/" . $this->grid_size . "/" . $file_name;
+        // Create folders if not exist
+        $dir_name  = dirname($path);
+        if (!is_dir($dir_name)) {
+            mkdir($dir_name, 0750, true);
+        }
         // Create File
-        $file     = fopen("stats/" . $this->grid_size . "/" . $filename, 'w');
+        $file = fopen($path, 'w');
         // Generate file line content
-        $txt      = microtime(TRUE) . "," . $_SERVER['REMOTE_ADDR'] . "," . $this->grid_size . "," . $this->board;
+        $txt  = microtime(TRUE) . "," . $_SERVER['REMOTE_ADDR'] . "," . $this->grid_size . "," . $this->board;
         // Write/Save to file.
         fwrite($file, $txt);
         // Close file.
         fclose($file);
 
         if ($this->debug) {
-            echo "<br /><br /> Stat for this game written to file: " . $filename;
+            echo "<br /><br /> Stat for this game written to file: " . $file_name;
         }
     }
 
