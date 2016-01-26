@@ -176,40 +176,40 @@ class Game {
             $this->game_message('too-many-o');
         } else if ($this->win_check('x')) {
             // X as won the game.
+            // Create a (small) game win file
+            $this->game_file("win");
             // Disable game board links
             $this->game_play(false);
             // Display Win Message
             $this->game_message('x-win');
-            // Create a (small) game win file
-            $this->game_file("win");
         } else if ($this->win_check('o')) {
             // O as won the game.
+            // Create a (small) game lose file
+            $this->game_file("lose");
             // Disable game board links
             $this->game_play(false);
             // Display Win Message
             $this->game_message('o-win');
-            // Create a (small) game lose file
-            $this->game_file("lose");
         } else if (stristr($this->board, '-') === FALSE) {
             // All cells have been filled, and there are no winners.
+            // Create a (small) game tie file
+            $this->game_file("tie");
             // Disable game board links (no links should be generated either way, but just in case.)
             $this->game_play(false);
             // Display Tie Game Message
             $this->game_message('tie-game');
-            // Create a (small) game tie file
-            $this->game_file("tie");
         } else {
             // At this point, it's time for the AI to make its move.
             $this->pick_move();
             // Check if the AI's move was the winning move.
             if ($this->win_check('o')) {
                 // O as won the game.
+                // Create a (small) game lose file
+                $this->game_file("lose");
                 // Disable game board links
                 $this->game_play(false);
                 // Display Win Message
                 $this->game_message('o-win');
-                // Create a (small) game lose file
-                $this->game_file("lose");
             } else {
                 // Player's turn.
                 $this->game_play(true);
@@ -539,7 +539,7 @@ class Game {
         // Generate Filename
         $file_name = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . "." . $stat;
         // Generate Directory path
-        $dir_name = "stats/" . $this->grid_size . "/";
+        $dir_name  = "stats/" . $this->grid_size . "/";
         // Create folders if not exist
         if (!is_dir($dir_name)) {
             mkdir($dir_name, 0750, true);
