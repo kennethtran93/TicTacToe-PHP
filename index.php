@@ -576,7 +576,7 @@ class Game {
             $winP  = ((double) $wins / (double) $games) * 100;
             $loseP = ((double) $loses / (double) $games) * 100;
             $tieP  = ((double) $ties / (double) $games) * 100;
-            echo "Out of <strong>" . $games . "</strong> completed games for board size <strong>" . $this->grid_size . "</strong>...<br />";
+            echo "Out of <strong>" . $games . "</strong> completed games for board size <strong>" . $this->grid_size . "x" . $this->grid_size . "</strong>...<br />";
             echo "Total Player (X) Wins: <strong>" . $wins . "</strong> ( " . $winP . "% )<br />";
             echo "Total AI (O) Wins / Player Defeats: <strong>" . $loses . "</strong> ( " . $loseP . "% )<br />";
             echo "Total Game Ties: <strong>" . $ties . "</strong> ( " . $tieP . "% )";
