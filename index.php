@@ -538,15 +538,14 @@ class Game {
     function game_file($stat) {
         // Generate Filename
         $file_name = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . "." . $stat;
-        // Generate Path
-        $path = "stats/" . $this->grid_size . "/" . $file_name;
+        // Generate Directory path
+        $dir_name = "stats/" . $this->grid_size . "/";
         // Create folders if not exist
-        $dir_name  = dirname($path);
         if (!is_dir($dir_name)) {
             mkdir($dir_name, 0750, true);
         }
         // Create File
-        $file = fopen($path, 'w');
+        $file = fopen($dir_name . $file_name, 'w');
         // Generate file line content
         $txt  = microtime(TRUE) . "," . $_SERVER['REMOTE_ADDR'] . "," . $this->grid_size . "," . $this->board;
         // Write/Save to file.
