@@ -554,10 +554,10 @@ class Game {
      * Generate Game Statistics
      */
     function game_stats() {
-        $wins  = count(glob("stats/" . $this->grid_size . "/*.win") or 0);
-        $loses = count(glob("stats/" . $this->grid_size . "/*.lose") or 0);
-        $ties  = count(glob("stats/" . $this->grid_size . "/*.tie") or 0);
-        $games = count(glob("stats/" . $this->grid_size . "/*.*") or 0);
+        $wins  = count(glob("stats/" . $this->grid_size . "/*.win") or null);
+        $loses = count(glob("stats/" . $this->grid_size . "/*.lose") or null);
+        $ties  = count(glob("stats/" . $this->grid_size . "/*.tie") or null);
+        $games = count(glob("stats/" . $this->grid_size . "/*.*") or null);
         $winP  = 0.00;
         $loseP = 0.00;
         $tieP  = 0.00;
@@ -568,10 +568,10 @@ class Game {
             $tieP  = $ties / $games;
         }
         echo "<br />";
-        echo "Out of <strong>" . $games . "</strong> Completed games for board size <strong>" . $this->grid_size . "</strong>...<br />";
-        echo "Total Player (X) Wins: <strong>" . $wins . "</strong> ( " . $winP . "%<br />";
-        echo "Total AI (O) Wins / Player Defeats: <strong>" . $loses . "</strong>( " . $loseP . "%<br />";
-        echo "Total Game Ties: <strong>" . $ties . "</strong>( " . $tieP . "%";
+        echo "Out of <strong>" . $games . "</strong> completed games for board size <strong>" . $this->grid_size . "</strong>...<br />";
+        echo "Total Player (X) Wins: <strong>" . $wins . "</strong> ( " . $winP . "%)<br />";
+        echo "Total AI (O) Wins / Player Defeats: <strong>" . $loses . "</strong>( " . $loseP . "%)<br />";
+        echo "Total Game Ties: <strong>" . $ties . "</strong>( " . $tieP . "%)";
     }
 
 }
