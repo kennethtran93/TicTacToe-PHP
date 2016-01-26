@@ -181,19 +181,23 @@ class Game {
             // Display Win Message
             $this->game_message('x-win');
             // Create a (small) game win file
-            $this->win_file();
+            $this->game_file("win");
         } else if ($this->win_check('o')) {
             // O as won the game.
             // Disable game board links
             $this->game_play(false);
             // Display Win Message
             $this->game_message('o-win');
+            // Create a (small) game lose file
+            $this->game_file("lose");
         } else if (stristr($this->board, '-') === FALSE) {
             // All cells have been filled, and there are no winners.
             // Disable game board links (no links should be generated either way, but just in case.)
             $this->game_play(false);
             // Display Tie Game Message
             $this->game_message('tie-game');
+            // Create a (small) game tie file
+            $this->game_file("tie");
         } else {
             // At this point, it's time for the AI to make its move.
             $this->pick_move();
@@ -521,27 +525,53 @@ class Game {
                 echo '<br /><br /><a draggable="false" href="' . $_SERVER['PHP_SELF'] . '?size=' . $this->grid_size . '&debug" style="-webkit-appearance: button; -moz-appearance: button; appearance: button; text-decoration: none; color: initial; padding: 0.5em;">Click here to start a new game with debugging info!</a>';
             }
         }
+        // Display Game Statistics
+        $this->game_stats();
     }
 
     /**
-     * Create a small Comma Seperated Values file to keep track of all wins.
+     * Create a small Comma Seperated Values file to keep track of all completed games.
      * Inside file:  Timestamp (with microseconds), IP Address, Board Size, Win Line
      */
-    function win_file() {
+    function game_file($stat) {
         // Generate Filename
-        $filename = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . ".board_" . $this->grid_size;
+        $filename = date('Ymd_His') . "-" . substr(microtime(TRUE), -4) . "." . $stat;
         // Create File
-        $winfile  = fopen("wins/" . $filename, 'w');
+        $file     = fopen("stats/" . $this->grid_size . "/" . $filename, 'w');
         // Generate file line content
         $txt      = microtime(TRUE) . "," . $_SERVER['REMOTE_ADDR'] . "," . $this->grid_size . "," . $this->board;
         // Write/Save to file.
-        fwrite($winfile, $txt);
+        fwrite($file, $txt);
         // Close file.
-        fclose($winfile);
-        
+        fclose($file);
+
         if ($this->debug) {
-            echo "<br /><br /> Win Stat for this game written to file: " . $filename;
+            echo "<br /><br /> Stat for this game written to file: " . $filename;
         }
+    }
+
+    /**
+     * Generate Game Statistics
+     */
+    function game_stats() {
+        $wins  = count(glob("stats/" . $this->grid_size . "/*.win") or 0);
+        $loses = count(glob("stats/" . $this->grid_size . "/*.lose") or 0);
+        $ties  = count(glob("stats/" . $this->grid_size . "/*.tie") or 0);
+        $games = count(glob("stats/" . $this->grid_size . "/*.*") or 0);
+        $winP  = 0.00;
+        $loseP = 0.00;
+        $tieP  = 0.00;
+
+        if ($games > 0) {
+            $winP  = $wins / $games;
+            $loseP = $loses / $games;
+            $tieP  = $ties / $games;
+        }
+        echo "<br />";
+        echo "Out of <strong>" . $games . "</strong> Completed games for board size <strong>" . $this->grid_size . "</strong>...<br />";
+        echo "Total Player (X) Wins: <strong>" . $wins . "</strong> ( " . $winP . "%<br />";
+        echo "Total AI (O) Wins / Player Defeats: <strong>" . $loses . "</strong>( " . $loseP . "%<br />";
+        echo "Total Game Ties: <strong>" . $ties . "</strong>( " . $tieP . "%";
     }
 
 }
