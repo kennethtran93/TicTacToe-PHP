@@ -5,15 +5,15 @@ Everything is contained inside the index.php file.
 
 The Game class contains everything needed to run the game.  Simply initialize/instantiate the class inside the `<body>` tag to begin.
 
-NEW in v1.5:
-* FEATURE:  Ability to choose the grid size (ie 3x3, 5x5, etc. up to 15x15)
-* OTHER:  Code Optimizations to reduce the file size.
+NEW in v1.6:
+* FEATURE:  Global Game Stats (Win/Lose/Tie/Total) per board size
 
 FEATURES:
 * Single-Player Mode Only
 * Decent AI logical programming
 * Player goes first
 * Decent sized game board
+* Ability to choose the grid size (ie 3x3, 5x5, etc. up to 15x15)
 * Reset / Start New Game button
 * Decent line checks
 * Winning line emphasized (highlighted), and non-winning squares faded.
