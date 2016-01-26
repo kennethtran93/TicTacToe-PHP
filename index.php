@@ -208,6 +208,8 @@ class Game {
                 $this->game_play(false);
                 // Display Win Message
                 $this->game_message('o-win');
+                // Create a (small) game lose file
+                $this->game_file("lose");
             } else {
                 // Player's turn.
                 $this->game_play(true);
