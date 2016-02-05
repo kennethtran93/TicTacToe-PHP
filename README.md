@@ -1,6 +1,6 @@
 ### PHP Tic Tac Toe by Ken
 
-*This was created for ACIT4850 - Lab01 @ BCIT*
+*This was created for ACIT4850 - Lab01 @ [BCIT - British Columbia Institute of Technology](http://www.bcit.ca)*
 
 Everything is contained inside the index.php file.
 
