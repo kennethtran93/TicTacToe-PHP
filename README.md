@@ -1,5 +1,6 @@
-# a4850-lab01
 ### PHP Tic Tac Toe by Ken
+
+*This was created for ACIT4850 - Lab01 @ BCIT*
 
 Everything is contained inside the index.php file.
 
